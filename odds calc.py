@@ -46,12 +46,13 @@ def get_super_bet():
                       "specjalna", "dla", "nowych", "graczy", "online!", "Bonus", "za", "program", "typ", "na", "gola",
                       "Polski", "meczu", "300", "PLN", "poprawny", "z", "Francją.", "Szczegóły", "i", "wygraną",
                       "otrzymasz", "-", "Postaw", "zakład", "oferty", "przedmeczowej,", "a", "jeśli", "trafisz",
-                      "otrzymasz", "bonus.", "sekcji", "„Promocje”", "PON.", "1/8", "finału."]
+                      "otrzymasz", "bonus.", "sekcji", "„Promocje”", "PON.", "1/8", "finału.", "Ćwierćfinał"]
     data_to_clear = []
     for i in downloaded_content:
         for j in i.text.split():
             if j not in forbiden_words:
                 data_to_clear.append(j)
+    print(data_to_clear)
     host_name = []
     for i in range(1, len(data_to_clear), 11):
         host_name.append(data_to_clear[i])

@@ -21,10 +21,7 @@ def get_fortuna():
     host_win_odds = data_to_clear[2:len(data_to_clear) - 8:11]
     draw = data_to_clear[3:len(data_to_clear) - 7:11]
     guest_win_odds = data_to_clear[4:len(data_to_clear) - 6:11]
-    match_names = []
-    for i in range(len(host)):
-        mecz = f"{host[i]} vs {guest[i]}"
-        match_names.append(mecz)
+    match_names = [f"{host[i]} vs {guest[i]}" for i in range(len(host))]
     match_names_series = pd.Series(match_names, name="match name")
     host_win_odds_series = pd.Series(host_win_odds, name="host odds", dtype=float)
     draw_series = pd.Series(draw, name="draw odds", dtype=float)
@@ -46,37 +43,18 @@ def get_super_bet():
                       "specjalna", "dla", "nowych", "graczy", "online!", "Bonus", "za", "program", "typ", "na", "gola",
                       "Polski", "meczu", "300", "PLN", "poprawny", "z", "Francją.", "Szczegóły", "i", "wygraną",
                       "otrzymasz", "-", "Postaw", "zakład", "oferty", "przedmeczowej,", "a", "jeśli", "trafisz",
-                      "otrzymasz", "bonus.", "sekcji", "„Promocje”", "PON.", "1/8", "finału.", "Ćwierćfinał"]
+                      "otrzymasz", "bonus.", "sekcji", "„Promocje”", "PON.", "1/8", "finału.", "Ćwierćfinał."]
     data_to_clear = []
     for i in downloaded_content:
         for j in i.text.split():
             if j not in forbiden_words:
                 data_to_clear.append(j)
-    print(data_to_clear)
-    host_name = []
-    for i in range(1, len(data_to_clear), 11):
-        host_name.append(data_to_clear[i])
-
-    guest_name = []
-    for i in range(2, len(data_to_clear), 11):
-        guest_name.append(data_to_clear[i])
-
-    host_win_odds = []
-    for i in range(4, len(data_to_clear), 11):
-        host_win_odds.append(data_to_clear[i])
-
-    draw_odds = []
-    for i in range(6, len(data_to_clear), 11):
-        draw_odds.append(data_to_clear[i])
-
-    guest_win_odds = []
-    for i in range(8, len(data_to_clear), 11):
-        guest_win_odds.append(data_to_clear[i])
-
-    event = []
-    for i in range(len(host_name)):
-        event.append(f"{host_name[i]} vs {guest_name[i]}")
-
+    host_name = [data_to_clear[i] for i in range(1, len(data_to_clear), 11)]
+    guest_name = [data_to_clear[i] for i in range(2, len(data_to_clear), 11)]
+    host_win_odds = [data_to_clear[i] for i in range(4, len(data_to_clear), 11)]
+    draw_odds = [data_to_clear[i] for i in range(6, len(data_to_clear), 11)]
+    guest_win_odds = [data_to_clear[i] for i in range(8, len(data_to_clear), 11)]
+    event = [f"{host_name[i]} vs {guest_name[i]}" for i in range(len(host_name))]
     event_series = pd.Series(data=event, name="match name")
     host_win_odds_series = pd.Series(data=host_win_odds, name="host odds", dtype=float)
     draw_odds_series = pd.Series(data=draw_odds, name="draw odds", dtype=float)
@@ -102,23 +80,13 @@ def get_fuksiarz():
             if j not in forbiden_words:
                 names_to_clean.append(j)
 
-    host_names = []
-    for i in range(2, len(names_to_clean), 4):
-        host_names.append(names_to_clean[i])
-
-    guest_names = []
-    for i in range(3, len(names_to_clean), 4):
-        guest_names.append(names_to_clean[i])
-
-    event = []
-    for i in range(len(host_names)):
-        event.append(f"{host_names[i]} vs {guest_names[i]}")
-
+    host_names = [names_to_clean[i] for i in range(2, len(names_to_clean), 4)]
+    guest_names = [names_to_clean[i] for i in range(3, len(names_to_clean), 4)]
+    event = [f"{host_names[i]} vs {guest_names[i]}" for i in range(len(host_names))]
     odds = []
     for i in odds_downloaded:
         if i.text.split():
             odds.append(i.text.split())
-
     host_win_odds = []
     draw_odds = []
     guest_win_odds = []
@@ -159,32 +127,32 @@ def arb_odds():
     df = df.groupby(['match name'])
     arb_value = []
     arbit_odd = []
-    for i, j in df:
+    for event, j in df:
         for win_odd in j['host win odds']:
             for draw_odd in j['draw odds']:
                 for guest_odd in j['guest win odds']:
                     wynik = round((1/win_odd)+(1/draw_odd)+(1/guest_odd), 2)
                     arbit_odd.append((win_odd, draw_odd, guest_odd))
                     arb_value.append(wynik)
+
     arbit_name = []
-    for i, j in df:
+    for event, j in df:
         for win_buk in j['bookmaker']:
             for draw_buk in j['bookmaker']:
                 for guest_buk in j['bookmaker']:
-                    buk_comb = [win_buk, draw_buk, guest_buk, i]
+                    buk_comb = [win_buk, draw_buk, guest_buk, event]
                     arbit_name.append(buk_comb)
-    events = []
+
     if len(arb_value) == len(arbit_odd) == len(arbit_name):
-        for i in range(len(arb_value)):
-            events.append([arb_value[i], arbit_odd[i], arbit_name[i]])
+        events = [[arb_value[i], arbit_odd[i], arbit_name[i]] for i in range(len(arb_value))]
+        for event in events:
+            #if event[0] < 0.85:
+                print(event)
+                print(f"host bet {round(((100 / event[1][0]) / event[0]), 2)}")
+                print(f"draw bet {round(((100 / event[1][1]) / event[0]), 2)}")
+                print(f"guest bet {round(((100 / event[1][2]) / event[0]), 2)}")
     else:
         print("cos poszlo nie tak z obrobka danych")
-    for i in events:
-        #if i[0] < 0.85:
-            print(i)
-            print(f"host bet {round(((100 / i[1][0]) / i[0]), 2)}")
-            print(f"draw bet {round(((100 / i[1][1]) / i[0]), 2)}")
-            print(f"guest bet {round(((100 / i[1][2]) / i[0]), 2)}")
 
 
 arb_odds()

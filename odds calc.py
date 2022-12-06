@@ -1,16 +1,16 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
 import pandas as pd
 
-
+s = Service("C:\Program Files (x86)\chromedriver.exe")
+driver = webdriver.Chrome(service=s)
 def get_fortuna():
     forbiden_text_names = ["-", "TVP 1", "Rozszerzona", "oferta", "LIVE", "BetBuilder", "Zagraj", "HIT", "DNIA", "TVP 2"
         , "Sport/", "/", "ZAGRAJ", "TVP", "1", "Sport", "wyższy", "kurs", "2", "Mecz", "Płd.", "S.", "finału", "1/8"
         , "1/4", "CF"]
-    PATH = "C:\Program Files (x86)\chromedriver.exe"
-    fortuna = webdriver.Chrome(PATH)
-    fortuna.get("https://www.efortuna.pl/zaklady-bukmacherskie/pilka-nozna-ms-2022/spotkania")
-    downloaded_content = fortuna.find_elements(By.CSS_SELECTOR, 'tr.tablesorter-hasChildRow')
+    driver.get("https://www.efortuna.pl/zaklady-bukmacherskie/pilka-nozna-ms-2022/spotkania")
+    downloaded_content = driver.find_elements(By.CSS_SELECTOR, 'tr.tablesorter-hasChildRow')
     data_to_clear = []
     for i in downloaded_content:
         for j in i.text.split():
@@ -35,10 +35,8 @@ def get_fortuna():
 
 
 def get_super_bet():
-    PATH = "C:\Program Files (x86)\chromedriver.exe"
-    super_bet = webdriver.Chrome(PATH)
-    super_bet.get("https://superbet.pl/zaklady-bukmacherskie/pilka-nozna/miedzynarodowe/mistrzostwa-swiata")
-    downloaded_content = super_bet.find_elements(By.CLASS_NAME, "event-row-container")
+    driver.get("https://superbet.pl/zaklady-bukmacherskie/pilka-nozna/miedzynarodowe/mistrzostwa-swiata")
+    downloaded_content = driver.find_elements(By.CLASS_NAME, "event-row-container")
     forbiden_words = ["w", "WT.", "ŚR.", "CZW.", "PT.", "1", "X", "2", "Płd.", "S.", "SOB.", "NIEDZ.", "Oferta",
                       "specjalna", "dla", "nowych", "graczy", "online!", "Bonus", "za", "program", "typ", "na", "gola",
                       "Polski", "meczu", "300", "PLN", "poprawny", "z", "Francją.", "Szczegóły", "i", "wygraną",
@@ -68,11 +66,9 @@ def get_super_bet():
 
 
 def get_fuksiarz():
-    PATH = "C:\Program Files (x86)\chromedriver.exe"
-    fuksiarz = webdriver.Chrome(PATH)
-    fuksiarz.get("https://fuksiarz.pl/zaklady-bukmacherskie/pilka-nozna/miedzynarodowe/mistrzostwa-swiata/174616/1")
-    downloaded_teams_names = fuksiarz.find_elements(By.CLASS_NAME, "event")
-    odds_downloaded = fuksiarz.find_elements(By.CLASS_NAME, "game")
+    driver.get("https://fuksiarz.pl/zaklady-bukmacherskie/pilka-nozna/miedzynarodowe/mistrzostwa-swiata/174616/1")
+    downloaded_teams_names = driver.find_elements(By.CLASS_NAME, "event")
+    odds_downloaded = driver.find_elements(By.CLASS_NAME, "game")
     forbiden_words = ["Saudyjska", "Płd.", "-"]
     names_to_clean = []
     for i in downloaded_teams_names:
@@ -83,10 +79,7 @@ def get_fuksiarz():
     host_names = [names_to_clean[i] for i in range(2, len(names_to_clean), 4)]
     guest_names = [names_to_clean[i] for i in range(3, len(names_to_clean), 4)]
     event = [f"{host_names[i]} vs {guest_names[i]}" for i in range(len(host_names))]
-    odds = []
-    for i in odds_downloaded:
-        if i.text.split():
-            odds.append(i.text.split())
+    odds = [i.text.split() for i in odds_downloaded if i.text.split()]
     host_win_odds = []
     draw_odds = []
     guest_win_odds = []
@@ -153,6 +146,3 @@ def arb_odds():
                 print(f"guest bet {round(((100 / event[1][2]) / event[0]), 2)}")
     else:
         print("cos poszlo nie tak z obrobka danych")
-
-
-arb_odds()
